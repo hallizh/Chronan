@@ -5,7 +5,7 @@ import { launchOpenAIOAuth, type OpenAITokens } from "@/lib/ai/openai";
 
 const DEFAULT_SETTINGS: AISettings = {
   provider: "openai",
-  model: "gpt-4o-mini",
+  model: "gpt-4.1-mini",
   apiKey: "",
   openaiTokens: undefined,
 };
