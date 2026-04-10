@@ -14,16 +14,16 @@ export interface AISettings {
 
 export const MODEL_OPTIONS: Record<AIProviderName, { id: string; label: string }[]> = {
   openai: [
-    { id: "gpt-4.1", label: "GPT-4.1" },
-    { id: "gpt-4.1-mini", label: "GPT-4.1 mini" },
-    { id: "gpt-4.1-nano", label: "GPT-4.1 nano" },
+    { id: "gpt-5.4", label: "GPT-5.4" },
+    { id: "gpt-5.4-mini", label: "GPT-5.4 mini" },
+    { id: "gpt-5.4-nano", label: "GPT-5.4 nano" },
   ],
   anthropic: [
     { id: "claude-sonnet-4-6", label: "Claude Sonnet 4.6" },
     { id: "claude-haiku-4-5-20251001", label: "Claude Haiku 4.5" },
   ],
   gemini: [
+    { id: "gemini-3-flash-preview", label: "Gemini 3 Flash (preview)" },
     { id: "gemini-2.5-flash", label: "Gemini 2.5 Flash" },
-    { id: "gemini-2.5-pro", label: "Gemini 2.5 Pro" },
   ],
 };
