@@ -32,7 +32,7 @@ Then load the extension in Chrome:
 3. Click **Load unpacked**
 4. Select the `dist/` folder
 
-The side panel hot-reloads when you change files. The service worker restarts automatically on changes (Chrome reloads the extension).
+`npm run dev` runs Vite in watch mode — it rebuilds `dist/` whenever you save a file. After each rebuild, click the **reload** button (↺) on the Chronan card in `chrome://extensions` to pick up the changes. The side panel will reflect them immediately after reload.
 
 ## Building for production
 
