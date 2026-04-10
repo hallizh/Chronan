@@ -6,11 +6,15 @@ export async function handleSearchProducts(
 ): Promise<MsgSearchResult> {
   try {
     // Try Icelandic term first
+    console.log(`[Chronan search] Icelandic: "${msg.query}"`);
     let products = await searchProducts(msg.query);
+    console.log(`[Chronan search] "${msg.query}" → ${products.length} results`);
 
     // If no results, fall back to English term
     if (products.length === 0 && msg.queryEn && msg.queryEn !== msg.query) {
+      console.log(`[Chronan search] fallback English: "${msg.queryEn}"`);
       products = await searchProducts(msg.queryEn);
+      console.log(`[Chronan search] "${msg.queryEn}" → ${products.length} results`);
     }
 
     return { type: "SEARCH_RESULT", ingredientId: msg.ingredientId, products };
