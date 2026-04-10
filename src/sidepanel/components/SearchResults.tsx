@@ -59,8 +59,8 @@ export function SearchResults({
                 <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                   {p.name}
                 </div>
-                {p.brand && (
-                  <div className="text-xs text-gray-400">{p.brand}</div>
+                {p.onSale && p.originalPrice && (
+                  <div className="text-xs text-red-400 line-through">{p.originalPrice.toLocaleString("is-IS")} kr</div>
                 )}
               </div>
               <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex-shrink-0">

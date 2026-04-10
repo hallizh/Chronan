@@ -54,43 +54,53 @@ export class KronanRateLimitError extends Error {
 
 interface RawSearchResponse {
   count: number;
-  results: RawProduct[];
+  page: number;
+  pageCount: number;
+  hasNextPage: boolean;
+  hits: RawSearchHit[];
 }
 
-interface RawProduct {
+interface RawSearchHit {
   sku: string;
   name: string;
-  brand?: { name: string };
-  price?: number;
-  pricePerUnit?: number;
-  unit?: string;
-  image?: string | { url: string };
-  inStock?: boolean;
+  price: number;
+  thumbnail?: string | null;
+  temporaryShortage?: boolean;
+  pricePerKilo?: number | null;
+  baseComparisonUnit?: string | null;
+  detail?: {
+    discountedPrice?: number;
+    discountPercent?: number;
+    onSale?: boolean;
+  } | null;
 }
 
-function normalizeProduct(p: RawProduct): KronanProduct {
-  let imageUrl: string | undefined;
-  if (typeof p.image === "string") imageUrl = p.image;
-  else if (p.image && typeof p.image === "object") imageUrl = p.image.url;
+function normalizeProduct(p: RawSearchHit): KronanProduct {
+  const onSale = p.detail?.onSale ?? false;
+  const displayPrice = (onSale && p.detail?.discountedPrice != null)
+    ? p.detail.discountedPrice
+    : p.price;
 
   return {
     sku: p.sku,
     name: p.name,
-    brand: p.brand?.name,
-    price: p.price ?? p.pricePerUnit ?? 0,
-    unit: p.unit,
-    imageUrl,
-    inStock: p.inStock ?? true,
+    price: displayPrice,
+    originalPrice: onSale ? p.price : undefined,
+    onSale,
+    imageUrl: p.thumbnail ?? undefined,
+    inStock: !(p.temporaryShortage ?? false),
+    pricePerKilo: p.pricePerKilo ?? undefined,
+    baseComparisonUnit: p.baseComparisonUnit ?? undefined,
   };
 }
 
 export async function searchProducts(query: string): Promise<KronanProduct[]> {
-  const body = { query, pageSize: SEARCH_PAGE_SIZE };
+  const body = { query, pageSize: SEARCH_PAGE_SIZE, withDetail: true };
   const data = await kronanFetch<RawSearchResponse>("/products/search/", {
     method: "POST",
     body: JSON.stringify(body),
   });
-  return (data.results ?? []).map(normalizeProduct);
+  return (data.hits ?? []).map(normalizeProduct);
 }
 
 export async function getCheckout(): Promise<CheckoutResponse> {

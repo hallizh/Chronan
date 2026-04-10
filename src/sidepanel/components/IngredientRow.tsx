@@ -72,8 +72,8 @@ export function IngredientRow({ ingredient: ing }: IngredientRowProps) {
                 <div className="text-xs font-medium text-gray-800 dark:text-gray-200 truncate">
                   {selectedProduct.name}
                 </div>
-                {selectedProduct.brand && (
-                  <div className="text-xs text-gray-400">{selectedProduct.brand}</div>
+                {selectedProduct.onSale && selectedProduct.originalPrice && (
+                  <div className="text-xs text-red-500 line-through">{selectedProduct.originalPrice.toLocaleString("is-IS")} kr</div>
                 )}
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">

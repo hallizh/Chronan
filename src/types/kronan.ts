@@ -1,11 +1,13 @@
 export interface KronanProduct {
   sku: string;
   name: string;
-  brand?: string;
-  price: number; // ISK integer
-  unit?: string; // "kg", "stk", "l"
-  imageUrl?: string;
-  inStock: boolean;
+  price: number;       // ISK integer (discounted price if on sale)
+  originalPrice?: number; // set when onSale is true
+  onSale: boolean;
+  imageUrl?: string;   // thumbnail
+  inStock: boolean;    // false when temporaryShortage
+  pricePerKilo?: number;
+  baseComparisonUnit?: string;
 }
 
 export interface KronanSearchRequest {
