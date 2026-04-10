@@ -10,6 +10,9 @@ const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 export default defineConfig({
   plugins: [react(), tailwindcss(), crx({ manifest })],
+  server: {
+    cors: true,
+  },
   resolve: {
     alias: {
       "@": resolve(__dirname, "src"),

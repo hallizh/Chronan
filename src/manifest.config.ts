@@ -5,7 +5,7 @@ export default defineManifest({
   name: "Chronan",
   version: "0.1.0",
   description: "Add recipe ingredients to your Krónan shopping note",
-  permissions: ["storage", "activeTab", "scripting", "sidePanel", "tabs"],
+  permissions: ["storage", "activeTab", "scripting", "sidePanel", "tabs", "alarms"],
   host_permissions: [
     "https://api.kronan.is/*",
     "https://api.openai.com/*",
