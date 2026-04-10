@@ -21,8 +21,6 @@ A Chrome extension that adds recipe ingredients to your [Krónan](https://www.kr
 ## Development setup
 
 ```bash
-git clone <repo>
-cd Chronan
 npm install
 npm run dev
 ```
