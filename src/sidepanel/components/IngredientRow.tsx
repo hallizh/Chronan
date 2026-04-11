@@ -15,9 +15,7 @@ export function IngredientRow({ ingredient: ing, onManualSearch }: IngredientRow
   const { selectProduct, setQuantity, toggleSkipped } = useRecipeStore();
 
   const selectedProduct = ing.matches.find((p) => p.sku === ing.selectedSku);
-  const linePrice = selectedProduct
-    ? selectedProduct.price * ing.selectedQuantity
-    : null;
+  const linePrice = selectedProduct ? selectedProduct.price * ing.selectedQuantity : null;
 
   async function handleSearch(query: string) {
     setIsManualSearching(true);
@@ -27,113 +25,107 @@ export function IngredientRow({ ingredient: ing, onManualSearch }: IngredientRow
   }
 
   return (
-    <div
-      className={`px-4 py-3 border-b border-gray-100 dark:border-gray-800 ${
-        ing.skipped ? "opacity-40" : ""
-      }`}
-    >
-      {/* Top row: checkbox + ingredient name */}
-      <div className="flex items-start gap-2">
-        <input
-          type="checkbox"
-          checked={!ing.skipped}
-          onChange={() => toggleSkipped(ing.id)}
-          className="mt-0.5 flex-shrink-0 accent-green-600"
-        />
-        <div className="flex-1 min-w-0">
-          <div className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">
-            {ing.name}
-          </div>
-          <div className="text-xs text-gray-400 truncate">{ing.raw}</div>
+    <div className={`px-3 py-3 border-b border-[#1e2d42] transition-opacity ${ing.skipped ? "opacity-40" : ""}`}>
+      <div className="flex items-start gap-3">
+        {/* Custom checkbox */}
+        <button
+          onClick={() => toggleSkipped(ing.id)}
+          className={`mt-0.5 w-5 h-5 rounded flex-shrink-0 flex items-center justify-center transition-colors ${
+            ing.skipped ? "border-2 border-[#2a3d55] bg-transparent" : "bg-green-500"
+          }`}
+        >
+          {!ing.skipped && (
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+              <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+        </button>
+
+        {/* Product image */}
+        <div className="w-11 h-11 bg-white rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center">
+          {selectedProduct?.imageUrl ? (
+            <img src={selectedProduct.imageUrl} alt="" className="w-full h-full object-contain" />
+          ) : ing.status === "searching" ? (
+            <div className="w-full h-full bg-gray-700 animate-pulse" />
+          ) : (
+            <div className="w-full h-full bg-gray-100" />
+          )}
         </div>
-      </div>
 
-      {/* Product match area */}
-      {!ing.skipped && (
-        <div className="mt-2 ml-6">
-          {ing.status === "searching" && (
-            <div className="flex items-center gap-2 text-xs text-gray-400">
-              <span className="inline-block w-3 h-3 border-2 border-gray-300 border-t-green-500 rounded-full animate-spin" />
-              Searching Krónan…
-            </div>
-          )}
-
-          {(ing.status === "not_found" || ing.status === "error") && !isManualSearching && (
-            <div className="space-y-1">
-              <div className="text-xs text-amber-600 dark:text-amber-400">
-                {ing.status === "not_found" ? "No product found" : "Search failed"}
+        {/* Info column */}
+        <div className="flex-1 min-w-0">
+          {/* Name + quantity row */}
+          <div className="flex items-start gap-2">
+            <span className="flex-1 text-white font-medium text-sm leading-tight">{ing.name}</span>
+            {!ing.skipped && ing.status === "found" && selectedProduct && (
+              <div className="flex-shrink-0">
+                <QuantityInput value={ing.selectedQuantity} onChange={(n) => setQuantity(ing.id, n)} />
               </div>
-              <InlineSearch onSearch={handleSearch} />
-            </div>
-          )}
+            )}
+          </div>
 
-          {(ing.status === "not_found" || ing.status === "error") && isManualSearching && (
-            <div className="flex items-center gap-2 text-xs text-gray-400">
-              <span className="inline-block w-3 h-3 border-2 border-gray-300 border-t-green-500 rounded-full animate-spin" />
-              Searching…
-            </div>
-          )}
-
-          {ing.status === "found" && selectedProduct && (
-            <div className="flex items-center gap-2">
-              {selectedProduct.imageUrl && (
-                <img
-                  src={selectedProduct.imageUrl}
-                  alt=""
-                  className="w-8 h-8 object-contain rounded flex-shrink-0"
-                />
-              )}
-              <div className="flex-1 min-w-0">
-                <div className="text-xs font-medium text-gray-800 dark:text-gray-200 truncate">
-                  {selectedProduct.name}
-                </div>
-                {selectedProduct.onSale && selectedProduct.originalPrice && (
-                  <div className="text-xs text-red-500 line-through">
-                    {selectedProduct.originalPrice.toLocaleString("is-IS")} kr
-                  </div>
-                )}
-              </div>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <QuantityInput
-                  value={ing.selectedQuantity}
-                  onChange={(n) => setQuantity(ing.id, n)}
-                />
+          {/* Product description + price */}
+          {!ing.skipped && ing.status === "found" && selectedProduct && (
+            <>
+              <div className="flex items-baseline justify-between gap-2 mt-0.5">
+                <p className="text-gray-400 text-xs truncate flex-1">{selectedProduct.name}</p>
                 {linePrice !== null && (
-                  <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 w-16 text-right">
+                  <span className="text-white font-bold text-sm flex-shrink-0">
                     {linePrice.toLocaleString("is-IS")} kr
                   </span>
                 )}
               </div>
+              {ing.matches.length > 0 && (
+                <button
+                  onClick={() => setShowPicker((v) => !v)}
+                  className="text-green-400 text-xs mt-1 hover:underline"
+                >
+                  {showPicker ? "Hide options ↑" : `Change (${ing.matches.length} options)`}
+                </button>
+              )}
+            </>
+          )}
+
+          {/* Searching state */}
+          {!ing.skipped && ing.status === "searching" && (
+            <div className="flex items-center gap-2 mt-1 text-gray-500 text-xs">
+              <span className="inline-block w-3 h-3 border-2 border-gray-600 border-t-green-400 rounded-full animate-spin" />
+              Searching Krónan…
             </div>
           )}
 
-          {/* Change button + picker (for found products) */}
-          {ing.status === "found" && ing.matches.length > 0 && (
-            <div className="mt-1">
-              <button
-                onClick={() => setShowPicker((v) => !v)}
-                className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
-              >
-                {showPicker
-                  ? "Hide options"
-                  : ing.matches.length > 1
-                  ? `Change (${ing.matches.length} options)`
-                  : "Change"}
-              </button>
-              {showPicker && (
-                <SearchResults
-                  products={isManualSearching ? [] : ing.matches}
-                  selectedSku={ing.selectedSku}
-                  onSelect={(sku) => selectProduct(ing.id, sku)}
-                  onClose={() => setShowPicker(false)}
-                  onSearch={handleSearch}
-                  isSearching={isManualSearching}
-                />
-              )}
+          {/* Not found / error state */}
+          {!ing.skipped && (ing.status === "not_found" || ing.status === "error") && !isManualSearching && (
+            <div className="mt-1 space-y-1.5">
+              <p className="text-amber-400 text-xs">
+                {ing.status === "not_found" ? "No product found" : "Search failed"}
+              </p>
+              <InlineSearch onSearch={handleSearch} />
+            </div>
+          )}
+
+          {!ing.skipped && (ing.status === "not_found" || ing.status === "error") && isManualSearching && (
+            <div className="flex items-center gap-2 mt-1 text-gray-500 text-xs">
+              <span className="inline-block w-3 h-3 border-2 border-gray-600 border-t-green-400 rounded-full animate-spin" />
+              Searching…
+            </div>
+          )}
+
+          {/* Picker dropdown */}
+          {!ing.skipped && showPicker && ing.status === "found" && (
+            <div className="mt-2">
+              <SearchResults
+                products={isManualSearching ? [] : ing.matches}
+                selectedSku={ing.selectedSku}
+                onSelect={(sku) => { selectProduct(ing.id, sku); setShowPicker(false); }}
+                onClose={() => setShowPicker(false)}
+                onSearch={handleSearch}
+                isSearching={isManualSearching}
+              />
             </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -148,20 +140,20 @@ function InlineSearch({ onSearch }: { onSearch: (query: string) => void }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-1">
+    <form onSubmit={handleSubmit} className="flex gap-1.5">
       <input
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search Krónan…"
-        className="flex-1 text-xs px-2 py-1.5 border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
+        className="flex-1 text-xs px-2.5 py-1.5 rounded-lg bg-[#132035] text-white placeholder-gray-500 border border-[#2a3d55] focus:outline-none focus:border-green-500"
       />
       <button
         type="submit"
         disabled={!query.trim()}
-        className="px-2 py-1.5 bg-blue-500 hover:bg-blue-600 disabled:opacity-40 text-white text-xs rounded"
+        className="px-3 py-1.5 bg-green-600 hover:bg-green-500 disabled:opacity-40 text-white text-xs rounded-lg transition-colors"
       >
-        🔍
+        →
       </button>
     </form>
   );

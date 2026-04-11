@@ -5,17 +5,19 @@ interface QuantityInputProps {
 
 export function QuantityInput({ value, onChange }: QuantityInputProps) {
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center border border-[#2a3d55] rounded-lg overflow-hidden">
       <button
         onClick={() => onChange(Math.max(1, value - 1))}
-        className="w-6 h-6 rounded border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center text-sm leading-none"
+        className="w-7 h-7 flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/10 transition-colors text-base leading-none"
       >
         −
       </button>
-      <span className="w-6 text-center text-sm font-medium">{value}</span>
+      <span className="w-6 text-center text-sm font-medium text-white border-x border-[#2a3d55]">
+        {value}
+      </span>
       <button
         onClick={() => onChange(value + 1)}
-        className="w-6 h-6 rounded border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center text-sm leading-none"
+        className="w-7 h-7 flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/10 transition-colors text-base leading-none"
       >
         +
       </button>

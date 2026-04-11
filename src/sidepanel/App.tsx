@@ -237,10 +237,12 @@ export default function App() {
     }
   }
 
+  const showHeader = view !== "idle" && view !== "settings_prompt" && view !== "extracting";
+
   return (
-    <div className="flex flex-col h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-      <Header />
-      <main className="flex-1 overflow-y-auto">
+    <div className="flex flex-col h-screen bg-[#0b1526] text-white">
+      {showHeader && <Header />}
+      <main className="flex-1 min-h-0">
         {view === "idle" && <IdleView onScan={loadCurrentPage} />}
         {view === "extracting" && <ExtractingView />}
         {view === "reviewing" && <IngredientReview onManualSearch={manualSearch} />}

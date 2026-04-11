@@ -20,7 +20,6 @@ export function IngredientReview({ onManualSearch }: IngredientReviewProps) {
   const skippedCount = ingredients.filter((i) => i.skipped).length;
   const searchingCount = ingredients.filter((i) => i.status === "searching").length;
 
-  // Compute total price from selected products × quantities
   const totalPrice = ingredients
     .filter((i) => !i.skipped && i.selectedSku)
     .reduce((sum, ing) => {
@@ -58,22 +57,24 @@ export function IngredientReview({ onManualSearch }: IngredientReviewProps) {
   }
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Recipe title */}
-      <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <h2 className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate">
+    <div className="flex flex-col h-full bg-[#0b1526]">
+      {/* Recipe title card */}
+      <div className="mx-3 mt-3 mb-1 bg-[#132035] rounded-xl px-4 py-3">
+        <p className="text-white text-sm font-medium leading-snug truncate">
           {recipeTitle || "Recipe ingredients"}
-        </h2>
-        <p className="text-xs text-gray-500 mt-0.5">
-          {ingredients.length} ingredients
-          {searchingCount > 0 && ` · searching ${searchingCount}…`}
-          {skippedCount > 0 && ` · ${skippedCount} skipped`}
         </p>
+        {(searchingCount > 0 || skippedCount > 0) && (
+          <p className="text-gray-500 text-xs mt-0.5">
+            {searchingCount > 0 && `Searching ${searchingCount}…`}
+            {searchingCount > 0 && skippedCount > 0 && " · "}
+            {skippedCount > 0 && `${skippedCount} skipped`}
+          </p>
+        )}
       </div>
 
       {/* Error banner */}
       {errorMessage && (
-        <div className="mx-4 mt-3 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-xs text-red-700 dark:text-red-400">
+        <div className="mx-3 mt-2 p-2.5 bg-red-900/30 border border-red-800 rounded-xl text-xs text-red-400">
           {errorMessage}
         </div>
       )}
@@ -85,47 +86,41 @@ export function IngredientReview({ onManualSearch }: IngredientReviewProps) {
         ))}
       </div>
 
-      {/* Footer: total price + action buttons */}
-      <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4">
-        {/* Total price */}
+      {/* Footer */}
+      <div className="bg-[#0b1526] px-4 pt-3 pb-4 border-t border-[#1e2d42]">
         {totalPrice > 0 && (
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm text-gray-600 dark:text-gray-400">
+            <span className="text-gray-400 text-sm">
               Estimated total
               {searchingCount > 0 && (
-                <span className="text-xs text-gray-400 ml-1">(still loading…)</span>
+                <span className="text-gray-600 text-xs ml-1">(loading…)</span>
               )}
             </span>
-            <span className="text-base font-bold text-gray-900 dark:text-white">
+            <span className="text-white font-bold text-base">
               {totalPrice.toLocaleString("is-IS")} kr
             </span>
           </div>
         )}
 
-        <div className="flex gap-2">
-          <button
-            onClick={() => handleAdd("note")}
-            disabled={activeIngredients.length === 0}
-            className="flex-1 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-40 text-white text-sm font-medium rounded-lg"
-          >
-            Add to Shopping Note
-          </button>
-          <button
-            onClick={() => handleAdd("cart")}
-            disabled={activeIngredients.length === 0}
-            className="px-3 py-2 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm rounded-lg text-gray-700 dark:text-gray-300"
-            title="Add directly to cart"
-          >
-            🛒
-          </button>
-        </div>
-
-        {activeIngredients.length === 0 && (
-          <p className="text-xs text-gray-400 text-center mt-2">
-            No products selected yet
-          </p>
-        )}
+        <button
+          onClick={() => handleAdd("cart")}
+          disabled={activeIngredients.length === 0}
+          className="w-full flex items-center justify-between px-5 py-3.5 bg-green-500 hover:bg-green-400 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold text-sm rounded-xl transition-colors"
+        >
+          <span>Add to Krónan Cart</span>
+          <CartIcon />
+        </button>
       </div>
     </div>
+  );
+}
+
+function CartIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="9" cy="21" r="1" />
+      <circle cx="20" cy="21" r="1" />
+      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+    </svg>
   );
 }
