@@ -31,6 +31,8 @@ interface RecipeStore {
   selectProduct: (ingredientId: string, sku: string) => void;
   setQuantity: (ingredientId: string, quantity: number) => void;
   toggleSkipped: (ingredientId: string) => void;
+  setIngredientSearching: (id: string) => void;
+  applyAIPicks: (picks: Array<{ ingredientId: string; sku: string | null }>) => void;
   setError: (msg: string | null) => void;
   setSuccess: (count: number) => void;
   reset: () => void;
@@ -87,6 +89,26 @@ export const useRecipeStore = create<RecipeStore>((set) => ({
       ingredients: state.ingredients.map((ing) =>
         ing.id === ingredientId ? { ...ing, skipped: !ing.skipped } : ing
       ),
+    })),
+
+  setIngredientSearching: (id) =>
+    set((state) => ({
+      ingredients: state.ingredients.map((ing) =>
+        ing.id === id
+          ? { ...ing, status: "searching", matches: [], selectedSku: null }
+          : ing
+      ),
+    })),
+
+  applyAIPicks: (picks) =>
+    set((state) => ({
+      ingredients: state.ingredients.map((ing) => {
+        const pick = picks.find((p) => p.ingredientId === ing.id);
+        if (!pick || pick.sku === null) return ing;
+        // Only apply if the SKU is actually in the current matches
+        if (!ing.matches.some((m) => m.sku === pick.sku)) return ing;
+        return { ...ing, selectedSku: pick.sku };
+      }),
     })),
 
   setError: (errorMessage) => set({ errorMessage }),

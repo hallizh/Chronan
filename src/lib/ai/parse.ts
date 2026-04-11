@@ -1,5 +1,5 @@
 import type { Ingredient } from "@/types/recipe";
-import type { RawAIIngredient } from "./types";
+import type { RawAIIngredient, PickOutput } from "./types";
 
 let idCounter = 0;
 function newId(): string {
@@ -51,4 +51,27 @@ export function parseAIResponse(content: string): Ingredient[] {
       searchTerm: item.searchTerm ?? item.name,
       searchTermEn: item.searchTermEn ?? item.name,
     }));
+}
+
+export function parsePickResponse(content: string): PickOutput[] {
+  let raw: unknown;
+  try {
+    const parsed: unknown = JSON.parse(content);
+    if (Array.isArray(parsed)) {
+      raw = parsed;
+    } else if (parsed && typeof parsed === "object") {
+      const arrayVal = Object.values(parsed as object).find((v) => Array.isArray(v));
+      raw = arrayVal ?? [];
+    } else {
+      raw = [];
+    }
+  } catch {
+    const match = content.match(/\[[\s\S]*\]/);
+    try { raw = match ? JSON.parse(match[0]) : []; } catch { raw = []; }
+  }
+
+  if (!Array.isArray(raw)) return [];
+  return (raw as Array<{ ingredientId: string; sku: string | null }>)
+    .filter((item) => item && typeof item === "object" && typeof item.ingredientId === "string")
+    .map((item) => ({ ingredientId: item.ingredientId, sku: item.sku ?? null }));
 }

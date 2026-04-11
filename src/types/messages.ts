@@ -70,6 +70,24 @@ export interface MsgDeleteRecipe {
   id: string;
 }
 
+export interface MsgPickProducts {
+  type: "PICK_PRODUCTS";
+  recipeTitle: string;
+  recipeUrl: string;
+  allIngredientNames: string[];
+  items: Array<{
+    ingredientId: string;
+    name: string;
+    products: Array<{ sku: string; name: string; price: number; inStock: boolean }>;
+  }>;
+}
+
+export interface MsgPickResult {
+  type: "PICK_RESULT";
+  picks: Array<{ ingredientId: string; sku: string | null }>;
+  error?: string;
+}
+
 // ── Background → Side panel (responses) ──────────────────────────────────────
 
 export interface MsgExtractResult {
@@ -105,6 +123,7 @@ export type BackgroundMessage =
   | MsgExtractWithAI
   | MsgParseIngredientLines
   | MsgSearchProducts
+  | MsgPickProducts
   | MsgAddToNote
   | MsgAddToCart
   | MsgSaveRecipe
@@ -114,5 +133,6 @@ export type BackgroundMessage =
 export type BackgroundResponse =
   | MsgExtractResult
   | MsgSearchResult
+  | MsgPickResult
   | MsgCartResult
   | MsgRecipesList;

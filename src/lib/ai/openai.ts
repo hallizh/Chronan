@@ -1,7 +1,7 @@
-import type { AIProvider } from "./types";
+import type { AIProvider, PickInput, PickOutput } from "./types";
 import type { Ingredient } from "@/types/recipe";
-import { SYSTEM_PROMPT, buildUserPrompt, buildIngredientLinesPrompt } from "./prompt";
-import { parseAIResponse } from "./parse";
+import { SYSTEM_PROMPT, PICK_SYSTEM_PROMPT, buildUserPrompt, buildIngredientLinesPrompt, buildPickPrompt } from "./prompt";
+import { parseAIResponse, parsePickResponse } from "./parse";
 import { STORAGE_KEYS } from "@/constants";
 
 // ── OAuth constants (OpenAI Codex public client) ──────────────────────────────
@@ -34,7 +34,7 @@ export class OpenAIProvider implements AIProvider {
     }
   }
 
-  private async call(userPrompt: string): Promise<Ingredient[]> {
+  private async callApi(systemPrompt: string, userPrompt: string): Promise<string> {
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -44,7 +44,7 @@ export class OpenAIProvider implements AIProvider {
       body: JSON.stringify({
         model: this.model,
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
         temperature: 0.1,
@@ -59,16 +59,25 @@ export class OpenAIProvider implements AIProvider {
     const data = await res.json() as {
       choices: Array<{ message: { content: string } }>;
     };
-    const content = data.choices[0]?.message?.content ?? "[]";
-    return parseAIResponse(content);
+    return data.choices[0]?.message?.content ?? "[]";
   }
 
   extractIngredients(pageText: string, url: string): Promise<Ingredient[]> {
-    return this.call(buildUserPrompt(pageText, url));
+    return this.callApi(SYSTEM_PROMPT, buildUserPrompt(pageText, url)).then(parseAIResponse);
   }
 
   parseIngredientLines(lines: string[]): Promise<Ingredient[]> {
-    return this.call(buildIngredientLinesPrompt(lines));
+    return this.callApi(SYSTEM_PROMPT, buildIngredientLinesPrompt(lines)).then(parseAIResponse);
+  }
+
+  async pickProducts(
+    recipeTitle: string,
+    recipeUrl: string,
+    allIngredientNames: string[],
+    items: PickInput[]
+  ): Promise<PickOutput[]> {
+    const content = await this.callApi(PICK_SYSTEM_PROMPT, buildPickPrompt(recipeTitle, recipeUrl, allIngredientNames, items));
+    return parsePickResponse(content);
   }
 }
 

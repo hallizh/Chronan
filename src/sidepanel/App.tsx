@@ -12,6 +12,8 @@ import type {
   MsgNoRecipe,
   MsgExtractResult,
   MsgSearchResult,
+  MsgPickProducts,
+  MsgPickResult,
 } from "@/types/messages";
 
 /**
@@ -33,7 +35,7 @@ function stripMeasurement(raw: string): string {
 import type { MatchedIngredient } from "@/types/recipe";
 
 export default function App() {
-  const { view, setView, setRecipe, setIngredients, updateIngredientMatches, setError } =
+  const { view, setView, setRecipe, setIngredients, updateIngredientMatches, applyAIPicks, setError } =
     useRecipeStore();
 
   useEffect(() => {
@@ -153,8 +155,8 @@ export default function App() {
     setIngredients(ingredients);
     setView("reviewing");
 
-    // Fire off parallel product searches
-    for (const ing of ingredients) {
+    // Fire off parallel product searches, collect all promises
+    const searchPromises = ingredients.map((ing) =>
       chrome.runtime
         .sendMessage({
           type: "SEARCH_PRODUCTS",
@@ -168,10 +170,70 @@ export default function App() {
             result.products,
             result.products.length > 0 ? "found" : "not_found"
           );
+          return result;
         })
         .catch(() => {
           updateIngredientMatches(ing.id, [], "error");
+          return { type: "SEARCH_RESULT" as const, ingredientId: ing.id, products: [] } as MsgSearchResult;
+        })
+    );
+
+    // After all searches complete, run AI product selection round
+    Promise.all(searchPromises).then((results) => {
+      const itemsForPick = results
+        .filter((r) => r.products.length > 0)
+        .map((r) => {
+          const ing = ingredients.find((i) => i.id === r.ingredientId)!;
+          return {
+            ingredientId: r.ingredientId,
+            name: ing.name,
+            products: r.products.map((p) => ({
+              sku: p.sku,
+              name: p.name,
+              price: p.price,
+              inStock: p.inStock,
+            })),
+          };
         });
+
+      if (itemsForPick.length === 0) return;
+
+      const { recipeTitle, recipeUrl } = useRecipeStore.getState();
+
+      chrome.runtime
+        .sendMessage({
+          type: "PICK_PRODUCTS",
+          recipeTitle,
+          recipeUrl,
+          allIngredientNames: ingredients.map((i) => i.name),
+          items: itemsForPick,
+        } satisfies MsgPickProducts)
+        .then((result: MsgPickResult) => {
+          if (!result.error && result.picks.length > 0) {
+            applyAIPicks(result.picks);
+          }
+        })
+        .catch(() => {}); // pick failure is non-critical
+    });
+  }
+
+  async function manualSearch(ingredientId: string, query: string) {
+    const { setIngredientSearching, updateIngredientMatches } = useRecipeStore.getState();
+    setIngredientSearching(ingredientId);
+    try {
+      const result = await chrome.runtime.sendMessage({
+        type: "SEARCH_PRODUCTS",
+        query,
+        queryEn: query,
+        ingredientId,
+      }) as MsgSearchResult;
+      updateIngredientMatches(
+        result.ingredientId,
+        result.products,
+        result.products.length > 0 ? "found" : "not_found"
+      );
+    } catch {
+      updateIngredientMatches(ingredientId, [], "error");
     }
   }
 
@@ -181,7 +243,7 @@ export default function App() {
       <main className="flex-1 overflow-y-auto">
         {view === "idle" && <IdleView onScan={loadCurrentPage} />}
         {view === "extracting" && <ExtractingView />}
-        {view === "reviewing" && <IngredientReview />}
+        {view === "reviewing" && <IngredientReview onManualSearch={manualSearch} />}
         {view === "adding" && <ExtractingView label="Adding to Krónan…" />}
         {view === "success" && <CartConfirmation />}
         {view === "saved_recipes" && <SavedRecipes />}

@@ -1,6 +1,7 @@
 import { setupKeepalive } from "./alarm";
 import { handleExtractWithAI, handleParseIngredientLines } from "./handlers/recipe";
 import { handleSearchProducts } from "./handlers/search";
+import { handlePickProducts } from "./handlers/pick";
 import { handleAddToCart, handleAddToNote } from "./handlers/cart";
 import {
   handleSaveRecipe,
@@ -42,6 +43,8 @@ async function handleMessage(
       return handleParseIngredientLines(message);
     case "SEARCH_PRODUCTS":
       return handleSearchProducts(message);
+    case "PICK_PRODUCTS":
+      return handlePickProducts(message);
     case "ADD_TO_NOTE":
       return handleAddToNote(message);
     case "ADD_TO_CART":

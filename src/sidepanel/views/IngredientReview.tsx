@@ -2,7 +2,11 @@ import { useRecipeStore } from "../stores/useRecipeStore";
 import { IngredientRow } from "../components/IngredientRow";
 import type { MsgCartResult } from "@/types/messages";
 
-export function IngredientReview() {
+interface IngredientReviewProps {
+  onManualSearch: (ingredientId: string, query: string) => void;
+}
+
+export function IngredientReview({ onManualSearch }: IngredientReviewProps) {
   const {
     recipeTitle,
     ingredients,
@@ -77,7 +81,7 @@ export function IngredientReview() {
       {/* Ingredient list */}
       <div className="flex-1 overflow-y-auto">
         {ingredients.map((ing) => (
-          <IngredientRow key={ing.id} ingredient={ing} />
+          <IngredientRow key={ing.id} ingredient={ing} onManualSearch={onManualSearch} />
         ))}
       </div>
 

@@ -1,7 +1,7 @@
-import type { AIProvider } from "./types";
+import type { AIProvider, PickInput, PickOutput } from "./types";
 import type { Ingredient } from "@/types/recipe";
-import { SYSTEM_PROMPT, buildUserPrompt, buildIngredientLinesPrompt } from "./prompt";
-import { parseAIResponse } from "./parse";
+import { SYSTEM_PROMPT, PICK_SYSTEM_PROMPT, buildUserPrompt, buildIngredientLinesPrompt, buildPickPrompt } from "./prompt";
+import { parseAIResponse, parsePickResponse } from "./parse";
 
 export class AnthropicProvider implements AIProvider {
   private model: string;
@@ -12,7 +12,7 @@ export class AnthropicProvider implements AIProvider {
     this.apiKey = opts.apiKey;
   }
 
-  private async call(userPrompt: string): Promise<Ingredient[]> {
+  private async callApi(systemPrompt: string, userPrompt: string): Promise<string> {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -24,7 +24,7 @@ export class AnthropicProvider implements AIProvider {
       body: JSON.stringify({
         model: this.model,
         max_tokens: 2048,
-        system: SYSTEM_PROMPT,
+        system: systemPrompt,
         messages: [{ role: "user", content: userPrompt }],
       }),
     });
@@ -37,15 +37,24 @@ export class AnthropicProvider implements AIProvider {
     const data = await res.json() as {
       content: Array<{ type: string; text: string }>;
     };
-    const content = data.content.find((b) => b.type === "text")?.text ?? "[]";
-    return parseAIResponse(content);
+    return data.content.find((b) => b.type === "text")?.text ?? "[]";
   }
 
   extractIngredients(pageText: string, url: string): Promise<Ingredient[]> {
-    return this.call(buildUserPrompt(pageText, url));
+    return this.callApi(SYSTEM_PROMPT, buildUserPrompt(pageText, url)).then(parseAIResponse);
   }
 
   parseIngredientLines(lines: string[]): Promise<Ingredient[]> {
-    return this.call(buildIngredientLinesPrompt(lines));
+    return this.callApi(SYSTEM_PROMPT, buildIngredientLinesPrompt(lines)).then(parseAIResponse);
+  }
+
+  async pickProducts(
+    recipeTitle: string,
+    recipeUrl: string,
+    allIngredientNames: string[],
+    items: PickInput[]
+  ): Promise<PickOutput[]> {
+    const content = await this.callApi(PICK_SYSTEM_PROMPT, buildPickPrompt(recipeTitle, recipeUrl, allIngredientNames, items));
+    return parsePickResponse(content);
   }
 }
