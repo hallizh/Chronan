@@ -5,53 +5,48 @@ interface IdleViewProps {
 
 export function IdleView({ onScan, settingsPrompt }: IdleViewProps) {
   return (
-    <div className="bg-white h-full flex flex-col">
-      {/* Mini brand header */}
-      <div className="flex items-center justify-center gap-1.5 pt-5 pb-1">
-        <span className="text-gray-900 font-bold text-xl">Chrónan</span>
-        <CartIcon />
+    <div className="h-full bg-surface flex flex-col items-center justify-center px-6 text-center gap-6">
+      <div className="w-20 h-20 rounded-full bg-surface-container-high flex items-center justify-center">
+        <span
+          className="material-symbols-outlined text-5xl text-on-surface-variant"
+          style={{ fontVariationSettings: "'FILL' 0, 'wght' 300, 'opsz' 48" }}
+        >
+          {settingsPrompt ? "settings" : "search"}
+        </span>
       </div>
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col items-center justify-center gap-5 px-8 pb-8 text-center">
-        <img src="/icons/icon128.png" alt="" className="w-36 h-36" />
-        <div>
-          <h2 className="text-gray-900 font-bold text-2xl mb-2">
-            {settingsPrompt ? "Setup required" : "No recipe detected"}
-          </h2>
-          <p className="text-gray-500 text-sm leading-relaxed max-w-xs">
-            {settingsPrompt
-              ? "Configure your AI provider and Krónan token in Settings before using Chrónan."
-              : "Navigate to a recipe page and click the button below to extract ingredients."}
-          </p>
-        </div>
-
-        {settingsPrompt ? (
-          <button
-            onClick={() => chrome.runtime.openOptionsPage()}
-            className="px-8 py-2.5 bg-green-500 hover:bg-green-400 text-white font-medium rounded-full text-sm transition-colors"
-          >
-            Open Settings
-          </button>
-        ) : (
-          <button
-            onClick={onScan}
-            className="px-8 py-2.5 bg-green-500 hover:bg-green-400 text-white font-medium rounded-full text-sm transition-colors"
-          >
-            Scan this page
-          </button>
-        )}
+      <div>
+        <h2 className="font-headline text-2xl font-extrabold text-on-surface mb-2">
+          {settingsPrompt ? "Setup required" : "No recipe detected"}
+        </h2>
+        <p className="text-sm text-on-surface-variant leading-relaxed max-w-xs">
+          {settingsPrompt
+            ? "Configure your AI provider and Krónan token in Settings before using Chrónan."
+            : "Navigate to a recipe page and click Scan to extract ingredients automatically."}
+        </p>
       </div>
+
+      {settingsPrompt ? (
+        <button
+          onClick={() => chrome.runtime.openOptionsPage()}
+          className="flex items-center gap-2 bg-gradient-to-r from-primary-container to-surface-tint text-on-primary font-headline font-extrabold text-sm py-4 px-8 rounded-xl shadow-[0_8px_24px_-4px_rgba(63,229,108,0.3)] hover:brightness-110 active:scale-[0.98] transition-all"
+        >
+          <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+            settings
+          </span>
+          Open Settings
+        </button>
+      ) : (
+        <button
+          onClick={onScan}
+          className="flex items-center gap-2 bg-gradient-to-r from-primary-container to-surface-tint text-on-primary font-headline font-extrabold text-sm py-4 px-8 rounded-xl shadow-[0_8px_24px_-4px_rgba(63,229,108,0.3)] hover:brightness-110 active:scale-[0.98] transition-all"
+        >
+          <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+            center_focus_strong
+          </span>
+          Scan this page
+        </button>
+      )}
     </div>
-  );
-}
-
-function CartIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="9" cy="21" r="1" />
-      <circle cx="20" cy="21" r="1" />
-      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-    </svg>
   );
 }

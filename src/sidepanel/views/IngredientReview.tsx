@@ -17,7 +17,6 @@ export function IngredientReview({ onManualSearch }: IngredientReviewProps) {
   } = useRecipeStore();
 
   const activeIngredients = ingredients.filter((i) => !i.skipped && i.selectedSku);
-  const skippedCount = ingredients.filter((i) => i.skipped).length;
   const searchingCount = ingredients.filter((i) => i.status === "searching").length;
 
   const totalPrice = ingredients
@@ -27,7 +26,7 @@ export function IngredientReview({ onManualSearch }: IngredientReviewProps) {
       return sum + (product ? product.price * ing.selectedQuantity : 0);
     }, 0);
 
-  async function handleAdd(target: "note" | "cart") {
+  async function handleAdd() {
     setView("adding");
     try {
       const lines = activeIngredients.map((ing) => ({
@@ -36,7 +35,7 @@ export function IngredientReview({ onManualSearch }: IngredientReviewProps) {
       }));
 
       const result = await chrome.runtime.sendMessage({
-        type: target === "note" ? "ADD_TO_NOTE" : "ADD_TO_CART",
+        type: "ADD_TO_NOTE",
         lines,
       }) as MsgCartResult;
 
@@ -57,70 +56,67 @@ export function IngredientReview({ onManualSearch }: IngredientReviewProps) {
   }
 
   return (
-    <div className="flex flex-col h-full bg-[#0b1526]">
-      {/* Recipe title card */}
-      <div className="mx-3 mt-3 mb-1 bg-[#132035] rounded-xl px-4 py-3">
-        <p className="text-white text-sm font-medium leading-snug truncate">
-          {recipeTitle || "Recipe ingredients"}
-        </p>
-        {(searchingCount > 0 || skippedCount > 0) && (
-          <p className="text-gray-500 text-xs mt-0.5">
-            {searchingCount > 0 && `Searching ${searchingCount}…`}
-            {searchingCount > 0 && skippedCount > 0 && " · "}
-            {skippedCount > 0 && `${skippedCount} skipped`}
-          </p>
-        )}
-      </div>
+    <div className="h-full overflow-y-auto pb-44 bg-surface">
+      {/* Recipe header */}
+      <header className="px-5 py-6">
+        <span className="text-primary font-bold text-[10px] uppercase tracking-[0.2em] mb-2 block">
+          {searchingCount > 0 ? `Searching ${searchingCount} products…` : "Recipe Ingredients"}
+        </span>
+        <h1 className="font-headline text-2xl font-extrabold leading-tight tracking-tight text-on-surface">
+          {recipeTitle || "Untitled recipe"}
+        </h1>
+        <div className="flex items-center gap-2 mt-3">
+          <span className="material-symbols-outlined text-on-surface-variant" style={{ fontSize: "16px" }}>restaurant</span>
+          <span className="text-on-surface-variant text-xs font-medium">
+            {ingredients.length} ingredient{ingredients.length !== 1 ? "s" : ""} detected
+          </span>
+        </div>
+      </header>
 
       {/* Error banner */}
       {errorMessage && (
-        <div className="mx-3 mt-2 p-2.5 bg-red-900/30 border border-red-800 rounded-xl text-xs text-red-400">
+        <div className="mx-5 mb-4 p-3 bg-error-container/20 border border-error/30 rounded-xl text-xs text-error flex items-start gap-2">
+          <span className="material-symbols-outlined text-sm flex-shrink-0">error</span>
           {errorMessage}
         </div>
       )}
 
-      {/* Ingredient list */}
-      <div className="flex-1 overflow-y-auto">
+      {/* Ingredients feed */}
+      <section className="space-y-4 px-5">
         {ingredients.map((ing) => (
           <IngredientRow key={ing.id} ingredient={ing} onManualSearch={onManualSearch} />
         ))}
-      </div>
+      </section>
 
-      {/* Footer */}
-      <div className="bg-[#0b1526] px-4 pt-3 pb-4 border-t border-[#1e2d42]">
-        {totalPrice > 0 && (
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-gray-400 text-sm">
-              Estimated total
-              {searchingCount > 0 && (
-                <span className="text-gray-600 text-xs ml-1">(loading…)</span>
+      {/* Fixed floating footer */}
+      <div className="fixed bottom-0 left-0 w-full z-40">
+        <div className="absolute inset-0 bg-surface/85 backdrop-blur-xl border-t border-outline-variant/20" />
+        <div className="relative px-5 pt-4 pb-6">
+          <div className="flex justify-between items-baseline mb-4">
+            <span className="text-on-surface-variant text-xs font-bold uppercase tracking-widest">
+              Estimated Total
+            </span>
+            <div className="text-right">
+              <span className="text-2xl font-black text-on-surface">
+                {totalPrice > 0 ? `${totalPrice.toLocaleString("is-IS")} kr.` : "—"}
+              </span>
+              {totalPrice > 0 && (
+                <p className="text-[10px] text-on-surface-variant">Price may vary in store</p>
               )}
-            </span>
-            <span className="text-white font-bold text-base">
-              {totalPrice.toLocaleString("is-IS")} kr
-            </span>
+            </div>
           </div>
-        )}
-
-        <button
-          onClick={() => handleAdd("cart")}
-          disabled={activeIngredients.length === 0}
-          className="w-full flex items-center justify-between px-5 py-3.5 bg-green-500 hover:bg-green-400 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold text-sm rounded-xl transition-colors"
-        >
-          <span>Add to Krónan Cart</span>
-          <CartIcon />
-        </button>
+          <button
+            onClick={handleAdd}
+            disabled={activeIngredients.length === 0}
+            className="w-full bg-gradient-to-r from-primary-container to-surface-tint text-on-primary font-headline font-extrabold text-sm py-4 rounded-xl shadow-[0_8px_24px_-4px_rgba(63,229,108,0.35)] hover:brightness-110 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none transition-all flex items-center justify-center gap-2"
+          >
+            <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+              playlist_add
+            </span>
+            Add to Shopping Note
+          </button>
+        </div>
       </div>
     </div>
-  );
-}
-
-function CartIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="9" cy="21" r="1" />
-      <circle cx="20" cy="21" r="1" />
-      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-    </svg>
   );
 }

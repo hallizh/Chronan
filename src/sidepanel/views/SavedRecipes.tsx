@@ -22,17 +22,25 @@ export function SavedRecipes() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="w-6 h-6 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+      <div className="h-full bg-surface flex items-center justify-center">
+        <div className="relative w-10 h-10">
+          <div className="absolute inset-0 rounded-full border-4 border-primary/20" />
+          <div className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+        </div>
       </div>
     );
   }
 
   if (recipes.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full p-8 text-center gap-3">
-        <div className="text-3xl">📋</div>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+      <div className="h-full bg-surface flex flex-col items-center justify-center px-6 text-center gap-4">
+        <span
+          className="material-symbols-outlined text-5xl text-on-surface-variant/40"
+          style={{ fontVariationSettings: "'FILL' 0, 'wght' 300, 'opsz' 48" }}
+        >
+          bookmarks
+        </span>
+        <p className="text-sm text-on-surface-variant">
           No saved recipes yet. After adding ingredients to Krónan, you can save the recipe here.
         </p>
       </div>
@@ -40,20 +48,20 @@ export function SavedRecipes() {
   }
 
   return (
-    <div className="divide-y divide-gray-100 dark:divide-gray-800">
-      <div className="px-4 py-3">
-        <h2 className="font-semibold text-sm text-gray-900 dark:text-gray-100">
-          Saved Recipes ({recipes.length})
-        </h2>
+    <div className="bg-surface min-h-full">
+      <div className="px-5 py-6">
+        <h1 className="font-headline text-2xl font-extrabold text-on-surface">Saved Recipes</h1>
+        <p className="text-xs text-on-surface-variant mt-1">{recipes.length} saved</p>
       </div>
-      {recipes.map((recipe) => (
-        <div key={recipe.id} className="px-4 py-3">
-          <div className="flex items-start gap-3">
+
+      <div className="space-y-3 px-5 pb-8">
+        {recipes.map((recipe) => (
+          <div key={recipe.id} className="bg-surface-container-low rounded-xl p-4 flex gap-3">
             {recipe.imageUrl && (
               <img
                 src={recipe.imageUrl}
                 alt=""
-                className="w-12 h-12 object-cover rounded flex-shrink-0"
+                className="w-14 h-14 object-cover rounded-lg flex-shrink-0"
               />
             )}
             <div className="flex-1 min-w-0">
@@ -61,40 +69,40 @@ export function SavedRecipes() {
                 href={recipe.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline truncate block"
+                className="text-sm font-bold text-on-surface hover:text-primary transition-colors truncate block leading-tight"
               >
                 {recipe.title}
               </a>
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p className="text-xs text-on-surface-variant mt-0.5">
                 {recipe.ingredients.length} ingredients ·{" "}
                 {new Date(recipe.savedAt).toLocaleDateString("is-IS")}
               </p>
-              <div className="mt-1 flex flex-wrap gap-1">
-                {recipe.ingredients.slice(0, 5).map((ing) => (
+              <div className="mt-2 flex flex-wrap gap-1">
+                {recipe.ingredients.slice(0, 4).map((ing) => (
                   <span
                     key={ing.id}
-                    className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-1.5 py-0.5 rounded"
+                    className="text-[10px] bg-surface-container text-on-surface-variant px-2 py-0.5 rounded-full"
                   >
                     {ing.name}
                   </span>
                 ))}
-                {recipe.ingredients.length > 5 && (
-                  <span className="text-xs text-gray-400">
-                    +{recipe.ingredients.length - 5} more
+                {recipe.ingredients.length > 4 && (
+                  <span className="text-[10px] text-on-surface-variant/60">
+                    +{recipe.ingredients.length - 4} more
                   </span>
                 )}
               </div>
             </div>
             <button
               onClick={() => deleteRecipe(recipe.id)}
-              className="text-gray-300 hover:text-red-400 text-sm flex-shrink-0"
+              className="text-on-surface-variant/40 hover:text-error transition-colors flex-shrink-0 p-1"
               title="Delete recipe"
             >
-              ✕
+              <span className="material-symbols-outlined text-lg">delete</span>
             </button>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }

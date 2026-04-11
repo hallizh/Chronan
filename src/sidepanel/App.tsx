@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRecipeStore } from "./stores/useRecipeStore";
 import { IdleView } from "./views/IdleView";
 import { ExtractingView } from "./views/ExtractingView";
@@ -37,6 +37,17 @@ import type { MatchedIngredient } from "@/types/recipe";
 export default function App() {
   const { view, setView, setRecipe, setIngredients, updateIngredientMatches, applyAIPicks, setError } =
     useRecipeStore();
+
+  const [theme, setTheme] = useState<"dark" | "light">(() => {
+    return (localStorage.getItem("theme") as "dark" | "light") || "dark";
+  });
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
 
   useEffect(() => {
     loadCurrentPage();
@@ -237,11 +248,9 @@ export default function App() {
     }
   }
 
-  const showHeader = view !== "idle" && view !== "settings_prompt" && view !== "extracting";
-
   return (
-    <div className="flex flex-col h-screen bg-[#0b1526] text-white">
-      {showHeader && <Header />}
+    <div className="flex flex-col h-screen bg-surface text-on-surface font-body antialiased">
+      <Header theme={theme} onThemeToggle={toggleTheme} />
       <main className="flex-1 min-h-0">
         {view === "idle" && <IdleView onScan={loadCurrentPage} />}
         {view === "extracting" && <ExtractingView />}

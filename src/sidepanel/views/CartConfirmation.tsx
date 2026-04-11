@@ -34,37 +34,47 @@ export function CartConfirmation() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-full p-8 text-center gap-4">
-      <div className="text-4xl">✅</div>
+    <div className="h-full bg-surface flex flex-col items-center justify-center px-6 text-center gap-6">
+      <div className="w-20 h-20 rounded-full bg-primary-container/30 flex items-center justify-center">
+        <span
+          className="material-symbols-outlined text-5xl text-primary"
+          style={{ fontVariationSettings: "'FILL' 1" }}
+        >
+          check_circle
+        </span>
+      </div>
+
       <div>
-        <h2 className="font-semibold text-gray-800 dark:text-gray-200 mb-1">
-          Added to Krónan!
-        </h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <h2 className="font-headline text-2xl font-extrabold text-on-surface mb-2">Added to Krónan!</h2>
+        <p className="text-sm text-on-surface-variant">
           {successItemCount} item{successItemCount !== 1 ? "s" : ""} added to your shopping note.
         </p>
       </div>
 
-      <div className="flex flex-col gap-2 w-full">
+      <div className="flex flex-col gap-3 w-full">
         <a
           href={KRONAN_SITE_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="block w-full py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg text-center"
+          className="w-full bg-gradient-to-r from-primary-container to-surface-tint text-on-primary font-headline font-extrabold text-sm py-4 rounded-xl shadow-[0_8px_24px_-4px_rgba(63,229,108,0.35)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
         >
-          Open Krónan →
+          <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 0" }}>
+            open_in_new
+          </span>
+          Open Krónan
         </a>
 
         <button
           onClick={saveRecipe}
-          className="w-full py-2 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm rounded-lg text-gray-700 dark:text-gray-300"
+          className="w-full py-3.5 rounded-xl border border-outline-variant/50 text-on-surface text-sm font-semibold hover:bg-surface-container-low transition-colors flex items-center justify-center gap-2"
         >
+          <span className="material-symbols-outlined text-base">bookmark_add</span>
           Save recipe
         </button>
 
         <button
           onClick={reset}
-          className="w-full py-2 text-sm text-gray-400 hover:text-gray-600"
+          className="text-xs text-on-surface-variant hover:text-on-surface transition-colors mt-1"
         >
           Scan another recipe
         </button>
